@@ -260,7 +260,20 @@ int parseline(const char *cmdline, char **argv)
  */
 int builtin_cmd(char **argv) 
 {
-    return 0;     /* not a builtin command */
+    if (strcmp(argv[0], "quit") == 0) {
+        // Handle the 'quit' command
+        exit(0);
+    } else if (strcmp(argv[0], "jobs") == 0) {
+        // Handle the 'jobs' command - lists all background jobs
+        listjobs(jobs);
+        return 1;
+    } else if (strcmp(argv[0], "bg") == 0 || strcmp(argv[0], "fg") == 0) {
+        // Handle 'bg' and 'fg' commands
+        do_bgfg(argv);
+        return 1;
+    }
+
+    return 0;
 }
 
 /* 
