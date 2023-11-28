@@ -1,7 +1,6 @@
 /* 
  * tsh - A tiny shell program with job control
  * 
- * <Put your name and login ID here>
  * Ikrom Numonov
  */
 #include <stdio.h>
