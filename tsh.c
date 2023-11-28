@@ -385,6 +385,36 @@ void waitfg(pid_t pid)
  */
 void sigchld_handler(int sig) 
 {
+    pid_t terminated_pid;
+    int termination_status;
+
+    while((terminated_pid = waitpid(-1, &termination_status, WNOHANG|WUNTRACED)) > 0) {
+        struct job_t *current_job = getjobpid(jobs, terminated_pid);
+
+        // if no jobs, contunye;
+        if (current_job == NULL) {
+            printf("(%d): No such child", terminated_pid);
+            continue;
+        }
+        
+        // if stopped, change status accordingly and print;
+        if (WIFSTOPPED(termination_status)) {
+            current_job->state = ST;
+            printf("Job [%d] (%d) stopped by signal 20\n", current_job->jid, terminated_pid);
+        }
+
+        // if signaled, remove job from job lits;
+        else if (WIFSIGNALED(termination_status)) {
+            printf("Job [%d] (%d) terminated by signal 2\n", current_job->jid, terminated_pid);
+            deletejob(jobs, terminated_pid);
+        }
+
+        // if exited, remove job from job list;
+        else if (WIFEXISTED(termination_status)) {
+            deletejob(jobs, terminate_pid);
+        }
+    }
+
     return;
 }
 
