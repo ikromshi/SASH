@@ -1,5 +1,5 @@
 ## Overview
-Tshell is a minimalistic shell program implemented in C, providing basic shell functionalities, including executing commands, handling built-in commands, and managing jobs (foreground and background processes).
+SASH (Slaine-Again Shell) is a minimalistic shell program implemented in C, providing basic shell functionalities, including executing commands, handling built-in commands, and managing jobs (foreground and background processes).
 
 ## Features
 - **Command Execution**: Executes both built-in and external commands.
