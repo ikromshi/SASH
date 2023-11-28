@@ -28,10 +28,10 @@ Press Ctrl-C to send `SIGINT` to the current foreground job. Press Ctrl-Z to sto
 Use `jobs` to list all jobs. Use `bg %<jobid>` to continue a stopped job in the background, and `fg %<jobid>` to bring a job to the foreground.
 
 ## Exiting the Shell
-Type `quit` to exit Tshell.
+Type `quit` to exit SASH.
 
 ## Note
-Tshell is a simple implementation and does not include all features of a full-fledged shell.
+SASH is a simple implementation and does not include all features of a full-fledged shell.
 
 
 
@@ -39,7 +39,7 @@ Tshell is a simple implementation and does not include all features of a full-fl
 
 - `Makefile`        # Compiles your shell program and runs the tests
 - `README`          # This file
-- `tsh.c`           # The shell program that you will write and hand in
+- `sash.c`          # The shell program that you will write and hand in
 - `tshref`          # The reference shell binary.
 
 ## The remaining files are used to test the shell
