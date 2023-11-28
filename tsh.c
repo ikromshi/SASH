@@ -297,43 +297,61 @@ int builtin_cmd(char **argv)
  */
 void do_bgfg(char **argv) 
 {
-    struct job_t *jobp=NULL;
+    struct job_t *job_info = NULL;
 
-    /* Check for job ID or process ID */
+    // if no job id or process id, return;
     if (argv[1] == NULL) {
         printf("%s command requires PID or %%jobid argument\n", argv[0]);
         return;
     }
 
-    /* Parse the necessary ID */
-    if (argv[1][0] == '%') { // Job ID
+    // parsing job id
+    if (argv[1][0] == '%') {
+        if (!isdigit(argv[1][1])) {
+            printf("%s: argument must be a pid or %%jobid\n", argv[0]);
+            return;
+        }
+
+
         int jid = atoi(&argv[1][1]);
-        jobp = getjobjid(jobs, jid);
-        if (jobp == NULL) {
+        job_info = getjobjid(jobs, jid);
+        if (job_info == NULL) {
             printf("%s: No such job\n", argv[1]);
             return;
         }
-    } else { // Process ID
+    } 
+
+    // parsing process id
+    else {
+        if (!isdigit(argv[1][1])) {
+            printf("%s: argument must be a pid or %%jodid\n", argv[0]);
+            return;
+        }
+
         pid_t pid = atoi(argv[1]);
-        jobp = getjobpid(jobs, pid);
-        if (jobp == NULL) {
+        job_info = getjobpid(jobs, pid);
+        if (job_info == NULL) {
             printf("(%s): No such process\n", argv[1]);
             return;
         }
     }
 
-    // Send SIGCONT signal to the job process group
-    kill(-(jobp->pid), SIGCONT);
+    // send SIGCONT signal to the job process group
+    kill(-(job_info->pid), SIGCONT);
 
+    // if bg, change job state to bg
     if (!strcmp(argv[0], "bg")) {
-        // Change job state to BG
-        jobp->state = BG;
-        printf("[%d] (%d) %s", jobp->jid, jobp->pid, jobp->cmdline);
-    } else {
-        // Change job state to FG
-        jobp->state = FG;
-        waitfg(jobp->pid);
+        job_info->state = BG;
+        printf("[%d] (%d) %s", job_info->jid, job_info->pid, job_info->cmdline);
     }
+
+    // if fg, change job state to fg
+    else {
+        job_info->state = FG;
+        waitfg(job_info->pid);
+    }
+
+    return;
 }
 
 /* 
