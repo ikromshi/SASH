@@ -359,7 +359,17 @@ void do_bgfg(char **argv)
  */
 void waitfg(pid_t pid)
 {
-    return;
+    while (1) {
+        struct job_t *job = getjobpid(jobs, pid);
+        
+        // if no job is found or nothing is in the foreground, break;
+        if (job == NULL || job->state != FG) {
+            break;
+        }
+
+        // otherwise, sleep;
+        sleep(1);
+    }
 }
 
 /*****************
