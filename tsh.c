@@ -169,24 +169,24 @@ void eval(char *cmdline)
     char *argv[MAXARGS]; // arguments for execve();
     int is_bg;              // flag for job running in the bg or fg;
     pid_t pid;           // process id;
-    struct job_t *jd;    
-    sigset *sgs;         // sigset that has to be blocked prior to adding job to jobs;
+    struct job_t *job_id;    
+    sigset_t sgs;         // sigset that has to be blocked prior to adding job to jobs;
     
     is_bg = parseline(cmdline, argv);
 
     // blocking signals;
-    Sigemptyset(&sgs);
-    Sigaddset(&sgs, SIGTSTP);
-    Sigaddset(&sgs, SIGINT);
-    Sigaddset(&sgs, SIGCHLD);
+    sigemptyset(&sgs);
+    sigaddset(&sgs, SIGTSTP);
+    sigaddset(&sgs, SIGINT);
+    sigaddset(&sgs, SIGCHLD);
 
     if (!builtin_cmd(argv)) {
-        Sigprocmask(SIG_BLOCK, &mask, NULL);
+        sigprocmask(SIG_BLOCK, &sgs, NULL);
 
         // create process as a child;
-        if ((pid = Fork()) == 0) {
-            Sigprocmask(SIG_UNBLOCK, &mask, NULL);
-            Setpid(0, 0);
+        if ((pid = fork()) == 0) {
+            sigprocmask(SIG_UNBLOCK, &sgs, NULL);
+            setpgid(0, 0);
             
             if (execve(argv[0], argv, environ) < 0) {
                 printf("%s: Command not found.\n", argv[0]);
@@ -195,18 +195,18 @@ void eval(char *cmdline)
         }
 
         // if it should run in the foreground, we wait;
-        if (!bg) {
+        if (!is_bg) {
            addjob(jobs, pid, FG, cmdline);
-           Sigprocmask(SIG_UNBLOCK, &mask, NULL);
+           sigprocmask(SIG_UNBLOCK, &sgs, NULL);
            waitfg(pid);
         }
 
         // if it's a background process, add the process to jobs and print JID info
         else {
             addjob(jobs, pid, BG, cmdline);
-            Sigprocmask(SIG_UNBLOCK, &mask, NULL);
+            sigprocmask(SIG_UNBLOCK, &sgs, NULL);
             job_id = getjobpid(jobs, pid);
-            printf("[%d] (%d) %s", job_id->jid, job_id->pid, jd->cmdline);
+            printf("[%d] (%d) %s", job_id->jid, job_id->pid, job_id->cmdline);
         }
     }
 
@@ -410,8 +410,8 @@ void sigchld_handler(int sig)
         }
 
         // if exited, remove job from job list;
-        else if (WIFEXISTED(termination_status)) {
-            deletejob(jobs, terminate_pid);
+        else if (WIFEXITED(termination_status)) {
+            deletejob(jobs, terminated_pid);
         }
     }
 
@@ -447,7 +447,7 @@ void sigtstp_handler(int sig)
     fg_pid = fgpid(jobs);
 
     // if a foreground job exists, send SIGTSTP to all the processes in the fg;
-    if (fpid > 0) {
+    if (fg_pid > 0) {
         kill(-fg_pid, SIGTSTP);
     }
 
