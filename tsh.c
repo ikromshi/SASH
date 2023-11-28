@@ -425,6 +425,14 @@ void sigchld_handler(int sig)
  */
 void sigint_handler(int sig) 
 {
+    pid_t fg_pid;
+    fg_pid = fgpid(jobs);
+
+    // if a foreground job exists, send SIGINT to all the processes in the fg;
+    if (fg_pid > 0) {
+        kill(-fg_pid, SIGINT);
+    }
+
     return;
 }
 
@@ -435,6 +443,14 @@ void sigint_handler(int sig)
  */
 void sigtstp_handler(int sig) 
 {
+    pid_t fg_pid;
+    fg_pid = fgpid(jobs);
+
+    // if a foreground job exists, send SIGTSTP to all the processes in the fg;
+    if (fpid > 0) {
+        kill(-fg_pid, SIGTSTP);
+    }
+
     return;
 }
 
